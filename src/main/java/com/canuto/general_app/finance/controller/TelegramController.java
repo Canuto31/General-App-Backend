@@ -55,7 +55,7 @@ public class TelegramController {
                     financeService.saveExpense(expense);
                 }
     
-                telegramService.sentMessage(chatId, "Saved " + expenses.size() + "expenses.");
+                telegramService.sentMessage(chatId, "Saved " + expenses.size() + " expenses.");
 
                 updateService.markAsProcessed(updateId);
             }
