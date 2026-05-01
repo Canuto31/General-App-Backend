@@ -8,6 +8,7 @@ import com.canuto.general_app.finance.model.Expense;
 import com.canuto.general_app.finance.parser.TextParserService;
 import com.canuto.general_app.finance.service.FinanceService;
 import com.canuto.general_app.finance.service.TelegramService;
+import com.canuto.general_app.finance.service.TelegramUpdateService;
 
 import java.util.List;
 
@@ -28,23 +29,38 @@ public class TelegramController {
 
     @Autowired
     private TelegramService telegramService;
+
+    @Autowired
+    private TelegramUpdateService updateService;
     
     @PostMapping("/webhook")
     public ResponseEntity<Void> receiveUpdate(@RequestBody TelegramUpdate update) {
 
-        if (update.getMessage() != null) {
-            String text = update.getMessage().getText();
-            Long chatId = update.getMessage().getChat().getId();
+        Long updateId = update.getUpdateId();
 
-            System.out.println("ChatId: " + chatId);
-            System.out.println("Message: " + text);
+        if (updateService.isAlreadyProcessed(updateId)) {
+            return ResponseEntity.ok().build();
+        }
 
-            List<Expense> expenses = parserService.parseMultipleExpenses(text);
-            for (Expense expense : expenses) {
-                financeService.saveExpense(expense);
+        try {
+            if (update.getMessage() != null) {
+                String text = update.getMessage().getText();
+                Long chatId = update.getMessage().getChat().getId();
+    
+                System.out.println("ChatId: " + chatId);
+                System.out.println("Message: " + text);
+    
+                List<Expense> expenses = parserService.parseMultipleExpenses(text);
+                for (Expense expense : expenses) {
+                    financeService.saveExpense(expense);
+                }
+    
+                telegramService.sentMessage(chatId, "Saved " + expenses.size() + "expenses.");
+
+                updateService.markAsProcessed(updateId);
             }
-
-            telegramService.sentMessage(chatId, "Saved " + expenses.size() + "expenses ✅");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return ResponseEntity.ok().build();

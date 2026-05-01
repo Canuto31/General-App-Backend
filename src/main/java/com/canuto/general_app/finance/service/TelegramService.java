@@ -1,5 +1,8 @@
 package com.canuto.general_app.finance.service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -14,12 +17,9 @@ public class TelegramService {
 
         RestTemplate restTemplate = new RestTemplate();
 
-        String body = """
-            {
-                "chatId": %d,
-                "text": "%s"
-            }
-        """.formatted(chatId, text);
+        Map<String, Object> body = new HashMap<>();
+        body.put("chat_id", chatId);
+        body.put("text", text);
 
         restTemplate.postForObject(url, body, String.class);
     }
