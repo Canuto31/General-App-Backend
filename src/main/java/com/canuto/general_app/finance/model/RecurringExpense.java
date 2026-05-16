@@ -41,5 +41,14 @@ public class RecurringExpense {
     @Column(name = "end_date")
     private LocalDate endDate;
 
+    @Column(name = "month_of_year")
+    private Integer monthOfYear;
+
+    @Column(name = "last_payment_date")
+    private LocalDate lastPaymentDate;
+
+    @Column(name = "paid_this_month")
+    private Boolean paidThisMonth = false;
+
     private Boolean active = true;
 }

@@ -1,5 +1,6 @@
 package com.canuto.general_app.finance.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 import com.canuto.general_app.finance.category.model.Category;
@@ -18,7 +19,7 @@ public class Expense {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private double amount;
+    private BigDecimal amount;
 
     private String note;
 

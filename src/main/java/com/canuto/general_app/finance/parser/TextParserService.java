@@ -1,5 +1,6 @@
 package com.canuto.general_app.finance.parser;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,13 +27,13 @@ public class TextParserService {
         Pattern pattern = Pattern.compile("(\\d+)(k)?");
         Matcher matcher = pattern.matcher(text);
 
-        double amount = 0;
+        BigDecimal amount = BigDecimal.ZERO;
 
         if (matcher.find()) {
-            amount = Double.parseDouble(matcher.group(1));
+            amount = new BigDecimal(matcher.group(1));
 
             if (matcher.group(2) != null) {
-                amount *= 1000;
+                amount = amount.multiply(new BigDecimal(1000));
             }
         }
 
