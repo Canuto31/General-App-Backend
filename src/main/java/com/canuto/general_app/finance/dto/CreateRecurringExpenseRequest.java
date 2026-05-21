@@ -17,4 +17,5 @@ public class CreateRecurringExpenseRequest {
     private LocalDate startDate;
     private LocalDate endDate;
     private Integer monthOfYear;
+    private Long categoryId;
 }

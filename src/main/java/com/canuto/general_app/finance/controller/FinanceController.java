@@ -26,8 +26,11 @@ public class FinanceController {
     private final TextParserService parserService;
     private final RecurringExpenseService recurringExpenseService;
 
-    public FinanceController(FinanceService financeService,
-            TextParserService parserService, RecurringExpenseService recurringExpenseService) {
+    public FinanceController(
+            FinanceService financeService,
+            TextParserService parserService,
+            RecurringExpenseService recurringExpenseService
+    ) {
         this.financeService = financeService;
         this.parserService = parserService;
         this.recurringExpenseService = recurringExpenseService;
@@ -38,7 +41,9 @@ public class FinanceController {
 
         List<Expense> expenses = parserService.parseMultipleExpenses(text);
 
-        return expenses.stream().map(financeService::saveExpense).toList();
+        return expenses.stream()
+                .map(financeService::saveExpense)
+                .toList();
     }
 
     @GetMapping("/expenses")
@@ -47,17 +52,19 @@ public class FinanceController {
     }
 
     @PostMapping("/recurring-expenses")
-    public RecurringExpense createRecurringExpense(@RequestBody CreateRecurringExpenseRequest request) {
+    public RecurringExpense createRecurringExpense(
+            @RequestBody CreateRecurringExpenseRequest request
+    ) {
         return recurringExpenseService.create(request);
-    }
-
-    @PostMapping("/recurring-expenses/{id}/pay")
-    public RecurringExpense payRecurringExpense(@PathVariable Long id) {
-        return recurringExpenseService.markAsPaid(id);
     }
 
     @GetMapping("/recurring-expenses")
     public List<RecurringExpense> getRecurringExpenses() {
         return recurringExpenseService.getAll();
+    }
+
+    @PostMapping("/recurring-expenses/{name}/pay")
+    public Expense payRecurringExpense(@PathVariable String name) {
+        return recurringExpenseService.payRecurringExpense(name);
     }
 }
