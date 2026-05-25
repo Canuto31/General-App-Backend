@@ -1,5 +1,6 @@
 package com.canuto.general_app.finance.service;
 
+import com.canuto.general_app.finance.repository.ExpenseRepository;
 import com.canuto.general_app.finance.repository.RecurringExpenseRepository;
 
 import java.math.BigDecimal;
@@ -19,17 +20,16 @@ import com.canuto.general_app.finance.model.RecurringExpense;
 public class RecurringExpenseService {
 
     private final RecurringExpenseRepository recurringExpenseRepository;
-    private final FinanceService financeService;
     private final CategoryRepository categoryRepository;
+    private final ExpenseRepository expenseRepository;
 
     public RecurringExpenseService(
             RecurringExpenseRepository recurringExpenseRepository,
-            FinanceService financeService,
-            CategoryRepository categoryRepository
+            CategoryRepository categoryRepository, ExpenseRepository expenseRepository
     ) {
         this.recurringExpenseRepository = recurringExpenseRepository;
-        this.financeService = financeService;
         this.categoryRepository = categoryRepository;
+        this.expenseRepository = expenseRepository;
     }
 
     public RecurringExpense create(CreateRecurringExpenseRequest request) {
@@ -106,7 +106,7 @@ public class RecurringExpenseService {
         expense.setNote("Recurring payment: " + recurringExpense.getName());
         expense.setCategory(recurringExpense.getCategory());
 
-        Expense savedExpense = financeService.saveExpense(expense);
+        Expense savedExpense = expenseRepository.save(expense);
 
         recurringExpense.setLastPaymentDate(LocalDate.now());
 

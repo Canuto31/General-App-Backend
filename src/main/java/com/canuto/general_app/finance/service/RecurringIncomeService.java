@@ -12,6 +12,7 @@ import com.canuto.general_app.finance.model.Income;
 import com.canuto.general_app.finance.model.IncomeCategory;
 import com.canuto.general_app.finance.model.RecurringIncome;
 import com.canuto.general_app.finance.repository.IncomeCategoryRepository;
+import com.canuto.general_app.finance.repository.IncomeRepository;
 import com.canuto.general_app.finance.repository.RecurringIncomeRepository;
 
 @Service
@@ -19,13 +20,13 @@ public class RecurringIncomeService {
 
     private final RecurringIncomeRepository recurringIncomeRepository;
     private final IncomeCategoryRepository incomeCategoryRepository;
-    private final IncomeService incomeService;
+    private final IncomeRepository incomeRepository;
 
     public RecurringIncomeService(RecurringIncomeRepository recurringIncomeRepository,
-            IncomeCategoryRepository incomeCategoryRepository, IncomeService incomeService) {
+            IncomeCategoryRepository incomeCategoryRepository, IncomeRepository incomeRepository) {
         this.recurringIncomeRepository = recurringIncomeRepository;
         this.incomeCategoryRepository = incomeCategoryRepository;
-        this.incomeService = incomeService;
+        this.incomeRepository = incomeRepository;
     }
 
     public RecurringIncome create(CreateRecurringIncomeRequest request) {
@@ -79,7 +80,7 @@ public class RecurringIncomeService {
         income.setCategory(
                 recurringIncome.getCategory());
 
-        Income savedIncome = incomeService.save(income);
+        Income savedIncome = incomeRepository.save(income);
 
         recurringIncome.setLastReceivedDate(
                 LocalDate.now());
