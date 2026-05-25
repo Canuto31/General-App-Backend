@@ -1,5 +1,6 @@
 package com.canuto.general_app.finance.service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -114,5 +115,31 @@ public class RecurringIncomeService {
                 lastReceived.plusDays(7)
                         .isAfter(now);
         };
+    }
+
+    public BigDecimal getPendingRecurringIncome() {
+
+        List<RecurringIncome> recurringIncomeList = recurringIncomeRepository.findAll();
+
+        BigDecimal totalPending = BigDecimal.ZERO;
+
+        for (RecurringIncome recurringIncome : recurringIncomeList) {
+
+            if (!Boolean.TRUE.equals(
+                    recurringIncome.getActive())) {
+                continue;
+            }
+
+            boolean alreadyReceived = isAlreadyReceivedThisPeriod(
+                    recurringIncome);
+
+            if (!alreadyReceived) {
+
+                totalPending = totalPending.add(
+                        recurringIncome.getAmount());
+            }
+        }
+
+        return totalPending;
     }
 }

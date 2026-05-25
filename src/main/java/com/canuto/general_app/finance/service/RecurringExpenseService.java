@@ -2,6 +2,7 @@ package com.canuto.general_app.finance.service;
 
 import com.canuto.general_app.finance.repository.RecurringExpenseRepository;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
@@ -53,6 +54,39 @@ public class RecurringExpenseService {
 
     public List<RecurringExpense> getAll() {
         return recurringExpenseRepository.findAll();
+    }
+
+    public BigDecimal getPendingRecurringExpenses() {
+
+        List<RecurringExpense> recurringExpenses =
+                recurringExpenseRepository.findAll();
+
+        BigDecimal totalPending =
+                BigDecimal.ZERO;
+
+        for (RecurringExpense recurringExpense
+                : recurringExpenses) {
+
+            if (!Boolean.TRUE.equals(
+                    recurringExpense.getActive()
+            )) {
+                continue;
+            }
+
+            boolean alreadyPaid =
+                    isAlreadyPaidThisPeriod(
+                            recurringExpense
+                    );
+
+            if (!alreadyPaid) {
+
+                totalPending = totalPending.add(
+                        recurringExpense.getAmount()
+                );
+            }
+        }
+
+        return totalPending;
     }
 
     public Expense payRecurringExpense(String recurringName) {

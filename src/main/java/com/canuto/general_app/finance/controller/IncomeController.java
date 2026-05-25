@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.canuto.general_app.finance.dto.CreateIncomeCategoryRequest;
+import com.canuto.general_app.finance.dto.CreateIncomeRequest;
 import com.canuto.general_app.finance.dto.CreateRecurringIncomeRequest;
 import com.canuto.general_app.finance.model.Income;
 import com.canuto.general_app.finance.model.IncomeCategory;
@@ -40,6 +41,12 @@ public class IncomeController {
     @GetMapping
     public List<Income> getAllIncome() {
         return incomeService.getAll();
+    }
+
+    @PostMapping
+    public Income createIncome(
+            @RequestBody CreateIncomeRequest request) {
+        return incomeService.create(request);
     }
 
     @PostMapping("/categories")

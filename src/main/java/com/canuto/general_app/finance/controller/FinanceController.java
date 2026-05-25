@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.canuto.general_app.finance.dto.CreateRecurringExpenseRequest;
+import com.canuto.general_app.finance.dto.CurrentBalanceResponse;
+import com.canuto.general_app.finance.dto.MonthSummaryResponse;
 import com.canuto.general_app.finance.model.Expense;
 import com.canuto.general_app.finance.model.RecurringExpense;
 import com.canuto.general_app.finance.service.FinanceService;
@@ -29,8 +31,7 @@ public class FinanceController {
     public FinanceController(
             FinanceService financeService,
             TextParserService parserService,
-            RecurringExpenseService recurringExpenseService
-    ) {
+            RecurringExpenseService recurringExpenseService) {
         this.financeService = financeService;
         this.parserService = parserService;
         this.recurringExpenseService = recurringExpenseService;
@@ -51,10 +52,21 @@ public class FinanceController {
         return financeService.getAllExpenses();
     }
 
+    @GetMapping("/current-balance")
+    public CurrentBalanceResponse getCurrentBalance() {
+        return financeService
+                .getCurrentBalance();
+    }
+
+    @GetMapping("/month-summary")
+    public MonthSummaryResponse getMonthSummary() {
+
+        return financeService.getMonthSummary();
+    }
+
     @PostMapping("/recurring-expenses")
     public RecurringExpense createRecurringExpense(
-            @RequestBody CreateRecurringExpenseRequest request
-    ) {
+            @RequestBody CreateRecurringExpenseRequest request) {
         return recurringExpenseService.create(request);
     }
 
