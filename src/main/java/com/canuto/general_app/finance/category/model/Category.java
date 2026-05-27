@@ -1,6 +1,6 @@
 package com.canuto.general_app.finance.category.model;
 
-import com.canuto.general_app.finance.category.utils.CategoryType;
+import com.canuto.general_app.finance.category.enums.CategoryType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

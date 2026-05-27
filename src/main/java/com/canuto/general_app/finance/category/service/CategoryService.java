@@ -5,11 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.canuto.general_app.finance.category.dto.CreateCategoryRequest;
+import com.canuto.general_app.finance.category.enums.CategoryType;
 import com.canuto.general_app.finance.category.model.Category;
 import com.canuto.general_app.finance.category.model.CategoryKeyword;
 import com.canuto.general_app.finance.category.repository.CategoryKeywordRepository;
 import com.canuto.general_app.finance.category.repository.CategoryRepository;
-import com.canuto.general_app.finance.category.utils.CategoryType;
 
 @Service
 public class CategoryService {

@@ -1,6 +1,6 @@
 package com.canuto.general_app.finance.category.dto;
 
-import com.canuto.general_app.finance.category.utils.CategoryType;
+import com.canuto.general_app.finance.category.enums.CategoryType;
 
 import lombok.Data;
 
