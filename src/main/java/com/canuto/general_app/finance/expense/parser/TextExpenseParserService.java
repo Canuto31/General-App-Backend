@@ -14,11 +14,11 @@ import com.canuto.general_app.finance.category.service.CategoryService;
 import com.canuto.general_app.finance.expense.model.Expense;
 
 @Service
-public class TextParserService {
+public class TextExpenseParserService {
     
     private final CategoryService categoryService;
 
-    public TextParserService(CategoryService categoryService) {
+    public TextExpenseParserService(CategoryService categoryService) {
         this.categoryService = categoryService;
     }
 

@@ -5,8 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.canuto.general_app.finance.expense.model.Expense;
-import com.canuto.general_app.finance.expense.parser.TextParserService;
-import com.canuto.general_app.finance.expense.service.FinanceService;
+import com.canuto.general_app.finance.expense.parser.TextExpenseParserService;
+import com.canuto.general_app.finance.expense.service.ExpenseService;
+import com.canuto.general_app.finance.income.model.Income;
+import com.canuto.general_app.finance.income.parser.TextIncomeParserService;
+import com.canuto.general_app.finance.income.service.IncomeService;
 import com.canuto.general_app.finance.recurring.expense.service.RecurringExpenseService;
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
 import com.canuto.general_app.finance.telegram.enums.TelegramCommandType;
@@ -15,17 +18,22 @@ import com.canuto.general_app.finance.telegram.enums.TelegramCommandType;
 public class TelegramCommandService {
 
     private final TelegramCommandResolver commandResolver;
-    private final TextParserService parserService;
-    private final FinanceService financeService;
+    private final TextExpenseParserService expenseParserService;
+    private final TextIncomeParserService incomeParserService;
+    private final ExpenseService expenseService;
+    private final IncomeService incomeService;
     private final RecurringExpenseService recurringExpenseService;
     private final RecurringIncomeService recurringIncomeService;
 
-    public TelegramCommandService(TelegramCommandResolver commandResolver, TextParserService parserService,
-            FinanceService financeService, RecurringExpenseService recurringExpenseService,
+    public TelegramCommandService(TelegramCommandResolver commandResolver,
+            TextExpenseParserService expenseParserService, TextIncomeParserService incomeParserService,
+            ExpenseService expenseService, IncomeService incomeService, RecurringExpenseService recurringExpenseService,
             RecurringIncomeService recurringIncomeService) {
         this.commandResolver = commandResolver;
-        this.parserService = parserService;
-        this.financeService = financeService;
+        this.expenseParserService = expenseParserService;
+        this.incomeParserService = incomeParserService;
+        this.expenseService = expenseService;
+        this.incomeService = incomeService;
         this.recurringExpenseService = recurringExpenseService;
         this.recurringIncomeService = recurringIncomeService;
     }
@@ -38,7 +46,9 @@ public class TelegramCommandService {
 
             case PAY_RECURRING -> handlePayRecurring(text);
 
-            case RECEIVE_INCOME -> handleReceiveIncome(text);
+            case INCOME -> handleIncomes(text);
+            
+            case RECURRING_INCOME -> handleRecurringIncomes(text);
 
             case SUMMARY -> "Summary command not implemented yet.";
 
@@ -54,10 +64,10 @@ public class TelegramCommandService {
 
     private String handleExpense(String text) {
 
-        List<Expense> expenses = parserService.parseMultipleExpenses(text);
+        List<Expense> expenses = expenseParserService.parseMultipleExpenses(text);
 
         for (Expense expense : expenses) {
-            financeService.saveExpense(expense);
+            expenseService.saveExpense(expense);
         }
 
         return "Saved " + expenses.size() + " expense(s).";
@@ -74,15 +84,28 @@ public class TelegramCommandService {
         return "Recurring expense paid: " + recurringName;
     }
 
-    private String handleReceiveIncome(String text) {
+    private String handleIncomes(String text) {
 
-        String incomeName = text
+        List<Income> incomes = incomeParserService.parseMultipleIncomes(text);
+
+        for (Income income : incomes) {
+            incomeService.save(income);
+        }
+
+        return "Received " + incomes.size() + " income(s).";
+    }
+
+    private String handleRecurringIncomes(String text) {
+
+        String recurringIncomeName = text
                 .replaceFirst("received ", "")
                 .trim();
-
-        recurringIncomeService.receiveRecurringIncome(incomeName);
-
-        return "Recurring income received: " + incomeName;
+    
+        recurringIncomeService
+                .receiveRecurringIncome(recurringIncomeName);
+    
+        return "Recurring income received: "
+                + recurringIncomeName;
     }
 
     private String getHelpMessage() {

@@ -14,14 +14,14 @@ import com.canuto.general_app.finance.recurring.expense.service.RecurringExpense
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
 
 @Service
-public class FinanceService {
+public class ExpenseService {
 
     private final ExpenseRepository expenseRepository;
     private final IncomeRepository incomeRepository;
     private final RecurringExpenseService recurringExpenseService;
     private final RecurringIncomeService recurringIncomeService;
 
-    public FinanceService(ExpenseRepository expenseRepository, IncomeRepository incomeRepository,
+    public ExpenseService(ExpenseRepository expenseRepository, IncomeRepository incomeRepository,
             RecurringExpenseService recurringExpenseService, RecurringIncomeService recurringIncomeService) {
         this.expenseRepository = expenseRepository;
         this.incomeRepository = incomeRepository;

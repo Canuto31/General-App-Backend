@@ -9,11 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.canuto.general_app.finance.income.dto.CreateIncomeCategoryRequest;
 import com.canuto.general_app.finance.income.dto.CreateIncomeRequest;
 import com.canuto.general_app.finance.income.model.Income;
-import com.canuto.general_app.finance.income.model.IncomeCategory;
-import com.canuto.general_app.finance.income.service.IncomeCategoryService;
+import com.canuto.general_app.finance.income.parser.TextIncomeParserService;
 import com.canuto.general_app.finance.income.service.IncomeService;
 
 @RestController
@@ -21,14 +19,21 @@ import com.canuto.general_app.finance.income.service.IncomeService;
 public class IncomeController {
 
     private final IncomeService incomeService;
-
-    private final IncomeCategoryService incomeCategoryService;
+    private final TextIncomeParserService parserService;
 
     public IncomeController(
-            IncomeService incomeService,
-            IncomeCategoryService incomeCategoryService) {
+            IncomeService incomeService, TextIncomeParserService parserService) {
         this.incomeService = incomeService;
-        this.incomeCategoryService = incomeCategoryService;
+        this.parserService = parserService;
+    }
+
+    @PostMapping("/smart")
+    public List<Income> createIncomeSmart(@RequestBody String text) {
+        List<Income> incomes = parserService.parseMultipleIncomes(text);
+
+        return incomes.stream()
+                .map(incomeService::save)
+                .toList();
     }
 
     @GetMapping
@@ -40,17 +45,5 @@ public class IncomeController {
     public Income createIncome(
             @RequestBody CreateIncomeRequest request) {
         return incomeService.create(request);
-    }
-
-    @PostMapping("/categories")
-    public IncomeCategory createCategory(
-            @RequestBody CreateIncomeCategoryRequest request) {
-        return incomeCategoryService
-                .create(request);
-    }
-
-    @GetMapping("/categories")
-    public List<IncomeCategory> getCategories() {
-        return incomeCategoryService.getAll();
     }
 }

@@ -3,7 +3,7 @@ package com.canuto.general_app.finance.recurring.income.model;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import com.canuto.general_app.finance.income.model.IncomeCategory;
+import com.canuto.general_app.finance.incomeCategory.model.IncomeCategory;
 import com.canuto.general_app.finance.shared.enums.Frequency;
 
 import jakarta.persistence.Column;

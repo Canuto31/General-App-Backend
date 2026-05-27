@@ -2,18 +2,10 @@ package com.canuto.general_app.finance.telegram.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.canuto.general_app.finance.expense.model.Expense;
-import com.canuto.general_app.finance.expense.parser.TextParserService;
-import com.canuto.general_app.finance.expense.service.FinanceService;
 import com.canuto.general_app.finance.telegram.dto.TelegramUpdate;
 import com.canuto.general_app.finance.telegram.service.TelegramCommandService;
 import com.canuto.general_app.finance.telegram.service.TelegramService;
 import com.canuto.general_app.finance.telegram.service.TelegramUpdateService;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;

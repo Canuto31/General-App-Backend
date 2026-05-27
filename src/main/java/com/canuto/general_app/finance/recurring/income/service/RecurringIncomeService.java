@@ -8,9 +8,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.canuto.general_app.finance.income.model.Income;
-import com.canuto.general_app.finance.income.model.IncomeCategory;
-import com.canuto.general_app.finance.income.repository.IncomeCategoryRepository;
 import com.canuto.general_app.finance.income.repository.IncomeRepository;
+import com.canuto.general_app.finance.incomeCategory.model.IncomeCategory;
+import com.canuto.general_app.finance.incomeCategory.repository.IncomeCategoryRepository;
 import com.canuto.general_app.finance.recurring.income.dto.CreateRecurringIncomeRequest;
 import com.canuto.general_app.finance.recurring.income.model.RecurringIncome;
 import com.canuto.general_app.finance.recurring.income.repository.RecurringIncomeRepository;
