@@ -7,6 +7,7 @@ import com.canuto.general_app.finance.expense.model.Expense;
 import com.canuto.general_app.finance.expense.parser.TextParserService;
 import com.canuto.general_app.finance.expense.service.FinanceService;
 import com.canuto.general_app.finance.telegram.dto.TelegramUpdate;
+import com.canuto.general_app.finance.telegram.service.TelegramCommandService;
 import com.canuto.general_app.finance.telegram.service.TelegramService;
 import com.canuto.general_app.finance.telegram.service.TelegramUpdateService;
 
@@ -21,18 +22,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/telegram")
 public class TelegramController {
 
-    @Autowired
-    private TextParserService parserService;
+    /*
+     * @Autowired
+     * private TextParserService parserService;
+     * 
+     * @Autowired
+     * private FinanceService financeService;
+     */
 
-    @Autowired
-    private FinanceService financeService;
-
-    @Autowired
     private TelegramService telegramService;
-
-    @Autowired
     private TelegramUpdateService updateService;
-    
+    private TelegramCommandService telegramCommandService;
+
+    public TelegramController(
+            TelegramService telegramService,
+            TelegramUpdateService updateService,
+            TelegramCommandService telegramCommandService) {
+        this.telegramService = telegramService;
+        this.updateService = updateService;
+        this.telegramCommandService = telegramCommandService;
+    }
+
     @PostMapping("/webhook")
     public ResponseEntity<Void> receiveUpdate(@RequestBody TelegramUpdate update) {
 
@@ -46,24 +56,31 @@ public class TelegramController {
             if (update.getMessage() != null) {
                 String text = update.getMessage().getText();
                 Long chatId = update.getMessage().getChat().getId();
-    
+
                 System.out.println("ChatId: " + chatId);
                 System.out.println("Message: " + text);
-    
-                List<Expense> expenses = parserService.parseMultipleExpenses(text);
-                for (Expense expense : expenses) {
-                    financeService.saveExpense(expense);
-                }
-    
-                telegramService.sentMessage(chatId, "Saved " + expenses.size() + " expenses.");
+
+                String response = telegramCommandService.process(text);
+
+                telegramService.sentMessage(chatId, response);
 
                 updateService.markAsProcessed(updateId);
             }
         } catch (Exception e) {
             e.printStackTrace();
+
+            if (update.getMessage() != null) {
+
+                Long chatId = update.getMessage().getChat().getId();
+
+                telegramService.sentMessage(
+                        chatId,
+                        "Error processing command."
+                );
+            }
         }
 
         return ResponseEntity.ok().build();
     }
-    
+
 }
