@@ -25,8 +25,7 @@ public class RecurringExpenseService {
 
     public RecurringExpenseService(
             RecurringExpenseRepository recurringExpenseRepository,
-            CategoryRepository categoryRepository, ExpenseRepository expenseRepository
-    ) {
+            CategoryRepository categoryRepository, ExpenseRepository expenseRepository) {
         this.recurringExpenseRepository = recurringExpenseRepository;
         this.categoryRepository = categoryRepository;
         this.expenseRepository = expenseRepository;
@@ -60,32 +59,30 @@ public class RecurringExpenseService {
 
         List<RecurringExpense> recurringExpenses =
                 recurringExpenseRepository.findAll();
-
+    
         BigDecimal totalPending =
                 BigDecimal.ZERO;
-
+    
         for (RecurringExpense recurringExpense
                 : recurringExpenses) {
-
-            if (!Boolean.TRUE.equals(
-                    recurringExpense.getActive()
-            )) {
+    
+            if (!isApplicableNow(
+                    recurringExpense)) {
+    
                 continue;
             }
-
+    
             boolean alreadyPaid =
                     isAlreadyPaidThisPeriod(
-                            recurringExpense
-                    );
-
+                            recurringExpense);
+    
             if (!alreadyPaid) {
-
+    
                 totalPending = totalPending.add(
-                        recurringExpense.getAmount()
-                );
+                        recurringExpense.getAmount());
             }
         }
-
+    
         return totalPending;
     }
 
@@ -137,19 +134,46 @@ public class RecurringExpenseService {
         };
     }
 
-    public List<RecurringExpense> getPendingRecurringExpenseList() {
+    public List<RecurringExpense>
+        getPendingRecurringExpenseList() {
 
-        return recurringExpenseRepository
-                .findAll()
-                .stream()
-                .filter(recurringExpense ->
-                        Boolean.TRUE.equals(
-                                recurringExpense.getActive()))
-                .filter(recurringExpense ->
-                        !isAlreadyPaidThisPeriod(
-                                recurringExpense))
-                .sorted(Comparator.comparing(
-                        RecurringExpense::getDayOfMonth))
-                .toList();
+    return recurringExpenseRepository.findAll()
+            .stream()
+            .filter(this::isApplicableNow)
+            .filter(expense ->
+                    !isAlreadyPaidThisPeriod(
+                            expense))
+            .sorted((a, b) ->
+                    Integer.compare(
+                            a.getDayOfMonth(),
+                            b.getDayOfMonth()))
+            .toList();
+}
+
+    private boolean isApplicableNow(
+            RecurringExpense recurringExpense) {
+
+        LocalDate today = LocalDate.now();
+
+        if (!Boolean.TRUE.equals(
+                recurringExpense.getActive())) {
+            return false;
+        }
+
+        if (recurringExpense.getStartDate() != null
+                && today.isBefore(
+                        recurringExpense.getStartDate())) {
+
+            return false;
+        }
+
+        if (recurringExpense.getEndDate() != null
+                && today.isAfter(
+                        recurringExpense.getEndDate())) {
+
+            return false;
+        }
+
+        return true;
     }
 }
