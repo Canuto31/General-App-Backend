@@ -1,4 +1,4 @@
-package com.canuto.general_app.finance.expense.dto;
+package com.canuto.general_app.finance.summary.dto;
 
 import java.math.BigDecimal;
 

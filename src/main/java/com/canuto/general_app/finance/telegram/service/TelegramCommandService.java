@@ -12,6 +12,9 @@ import com.canuto.general_app.finance.income.parser.TextIncomeParserService;
 import com.canuto.general_app.finance.income.service.IncomeService;
 import com.canuto.general_app.finance.recurring.expense.service.RecurringExpenseService;
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
+import com.canuto.general_app.finance.summary.dto.CurrentBalanceResponse;
+import com.canuto.general_app.finance.summary.dto.MonthSummaryResponse;
+import com.canuto.general_app.finance.summary.service.FinancialSummarySerivice;
 import com.canuto.general_app.finance.telegram.enums.TelegramCommandType;
 
 @Service
@@ -24,11 +27,12 @@ public class TelegramCommandService {
     private final IncomeService incomeService;
     private final RecurringExpenseService recurringExpenseService;
     private final RecurringIncomeService recurringIncomeService;
+    private final FinancialSummarySerivice financialSummarySerivice;
 
     public TelegramCommandService(TelegramCommandResolver commandResolver,
             TextExpenseParserService expenseParserService, TextIncomeParserService incomeParserService,
             ExpenseService expenseService, IncomeService incomeService, RecurringExpenseService recurringExpenseService,
-            RecurringIncomeService recurringIncomeService) {
+            RecurringIncomeService recurringIncomeService, FinancialSummarySerivice financialSummarySerivice) {
         this.commandResolver = commandResolver;
         this.expenseParserService = expenseParserService;
         this.incomeParserService = incomeParserService;
@@ -36,6 +40,7 @@ public class TelegramCommandService {
         this.incomeService = incomeService;
         this.recurringExpenseService = recurringExpenseService;
         this.recurringIncomeService = recurringIncomeService;
+        this.financialSummarySerivice = financialSummarySerivice;
     }
 
     public String process(String text) {
@@ -50,9 +55,9 @@ public class TelegramCommandService {
             
             case RECURRING_INCOME -> handleRecurringIncomes(text);
 
-            case SUMMARY -> "Summary command not implemented yet.";
+            case SUMMARY -> handleSummary();
 
-            case BALANCE -> "Balance command not implemented yet.";
+            case BALANCE -> handleBalance();
 
             case PENDING -> "Pending command not implemented yet.";
 
@@ -106,6 +111,40 @@ public class TelegramCommandService {
     
         return "Recurring income received: "
                 + recurringIncomeName;
+    }
+
+    private String handleSummary() {
+        MonthSummaryResponse summary = financialSummarySerivice.getMonthSummary();
+
+        return """
+            Current balance: %s
+            Pending recurring expenses: %s
+            Pending recurring income: %s
+            Projected end month balance: %s
+            """
+            .formatted(
+                    summary.getCurrentBalance(),
+                    summary.getPendingRecurringExpenses(),
+                    summary.getPendingRecurringIncome(),
+                    summary.getProjectedEndMonthBalance()
+            );
+
+    }
+    
+    private String handleBalance() {
+        
+        CurrentBalanceResponse balance = financialSummarySerivice.getCurrentBalance();
+
+        return """
+            Current balance: %s
+            Total income: %s
+            Total expenses: %s
+            """
+            .formatted(
+                    balance.getCurrentBalance(),
+                    balance.getTotalIncome(),
+                    balance.getTotalExpenses()
+            );
     }
 
     private String getHelpMessage() {

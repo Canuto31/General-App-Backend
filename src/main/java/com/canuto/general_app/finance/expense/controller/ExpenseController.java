@@ -8,8 +8,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.canuto.general_app.finance.expense.dto.CurrentBalanceResponse;
-import com.canuto.general_app.finance.expense.dto.MonthSummaryResponse;
 import com.canuto.general_app.finance.expense.model.Expense;
 import com.canuto.general_app.finance.expense.parser.TextExpenseParserService;
 import com.canuto.general_app.finance.expense.service.ExpenseService;
@@ -39,17 +37,5 @@ public class ExpenseController {
     @GetMapping
     public List<Expense> getAll() {
         return expenseService.getAllExpenses();
-    }
-
-    @GetMapping("/current-balance")
-    public CurrentBalanceResponse getCurrentBalance() {
-        return expenseService
-                .getCurrentBalance();
-    }
-
-    @GetMapping("/month-summary")
-    public MonthSummaryResponse getMonthSummary() {
-
-        return expenseService.getMonthSummary();
     }
 }
