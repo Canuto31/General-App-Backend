@@ -12,8 +12,10 @@ import com.canuto.general_app.finance.income.parser.TextIncomeParserService;
 import com.canuto.general_app.finance.income.service.IncomeService;
 import com.canuto.general_app.finance.recurring.expense.service.RecurringExpenseService;
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
+import com.canuto.general_app.finance.shared.utils.MoneyFormatter;
 import com.canuto.general_app.finance.summary.dto.CurrentBalanceResponse;
 import com.canuto.general_app.finance.summary.dto.MonthSummaryResponse;
+import com.canuto.general_app.finance.summary.dto.PendingSummaryResponse;
 import com.canuto.general_app.finance.summary.service.FinancialSummarySerivice;
 import com.canuto.general_app.finance.telegram.enums.TelegramCommandType;
 
@@ -59,7 +61,7 @@ public class TelegramCommandService {
 
             case BALANCE -> handleBalance();
 
-            case PENDING -> "Pending command not implemented yet.";
+            case PENDING -> handlePending();
 
             case HELP -> getHelpMessage();
 
@@ -123,10 +125,10 @@ public class TelegramCommandService {
             Projected end month balance: %s
             """
             .formatted(
-                    summary.getCurrentBalance(),
-                    summary.getPendingRecurringExpenses(),
-                    summary.getPendingRecurringIncome(),
-                    summary.getProjectedEndMonthBalance()
+                    MoneyFormatter.format(summary.getCurrentBalance()),
+                    MoneyFormatter.format(summary.getPendingRecurringExpenses()),
+                    MoneyFormatter.format(summary.getPendingRecurringIncome()),
+                    MoneyFormatter.format(summary.getProjectedEndMonthBalance())
             );
 
     }
@@ -141,10 +143,26 @@ public class TelegramCommandService {
             Total expenses: %s
             """
             .formatted(
-                    balance.getCurrentBalance(),
-                    balance.getTotalIncome(),
-                    balance.getTotalExpenses()
+                    MoneyFormatter.format(balance.getCurrentBalance()),
+                    MoneyFormatter.format(balance.getTotalIncome()),
+                    MoneyFormatter.format(balance.getTotalExpenses())
             );
+    }
+
+    private String handlePending() {
+
+        PendingSummaryResponse pending = financialSummarySerivice.getPendingSummary();
+    
+        return """
+                Pending recurring expenses: %s
+                Pending recurring income: %s
+                Net pending balance: %s
+                """
+                .formatted(
+                    MoneyFormatter.format(pending.getPendingRecurringExpenses()),
+                    MoneyFormatter.format(pending.getPendingRecurringIncomes()),
+                    MoneyFormatter.format(pending.getNetPendingBalance())
+                );
     }
 
     private String getHelpMessage() {

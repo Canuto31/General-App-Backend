@@ -10,6 +10,7 @@ import com.canuto.general_app.finance.recurring.expense.service.RecurringExpense
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
 import com.canuto.general_app.finance.summary.dto.CurrentBalanceResponse;
 import com.canuto.general_app.finance.summary.dto.MonthSummaryResponse;
+import com.canuto.general_app.finance.summary.dto.PendingSummaryResponse;
 
 @Service
 public class FinancialSummarySerivice {
@@ -80,6 +81,35 @@ public class FinancialSummarySerivice {
         response.setProjectedEndMonthBalance(
                 projectedEndMonthBalance);
 
+        return response;
+    }
+
+    public PendingSummaryResponse getPendingSummary() {
+
+        BigDecimal pendingExpenses =
+                recurringExpenseService
+                        .getPendingRecurringExpenses();
+    
+        BigDecimal pendingIncome =
+                recurringIncomeService
+                        .getPendingRecurringIncome();
+    
+        BigDecimal netPending =
+                pendingIncome.subtract(
+                        pendingExpenses);
+    
+        PendingSummaryResponse response =
+                new PendingSummaryResponse();
+    
+        response.setPendingRecurringExpenses(
+                pendingExpenses);
+    
+        response.setPendingRecurringIncomes(
+                pendingIncome);
+    
+        response.setNetPendingBalance(
+                netPending);
+    
         return response;
     }
 }
