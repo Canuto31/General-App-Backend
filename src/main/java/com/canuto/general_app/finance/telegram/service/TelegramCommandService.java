@@ -15,6 +15,7 @@ import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeSe
 import com.canuto.general_app.finance.shared.utils.MoneyFormatter;
 import com.canuto.general_app.finance.summary.dto.CurrentBalanceResponse;
 import com.canuto.general_app.finance.summary.dto.MonthSummaryResponse;
+import com.canuto.general_app.finance.summary.dto.PendingItemResponse;
 import com.canuto.general_app.finance.summary.dto.PendingSummaryResponse;
 import com.canuto.general_app.finance.summary.service.FinancialSummarySerivice;
 import com.canuto.general_app.finance.telegram.enums.TelegramCommandType;
@@ -151,18 +152,51 @@ public class TelegramCommandService {
 
     private String handlePending() {
 
-        PendingSummaryResponse pending = financialSummarySerivice.getPendingSummary();
+        PendingSummaryResponse pending =
+                financialSummarySerivice
+                        .getPendingSummary();
     
-        return """
-                Pending recurring expenses: %s
-                Pending recurring income: %s
-                Net pending balance: %s
-                """
-                .formatted(
-                    MoneyFormatter.format(pending.getPendingRecurringExpenses()),
-                    MoneyFormatter.format(pending.getPendingRecurringIncomes()),
-                    MoneyFormatter.format(pending.getNetPendingBalance())
-                );
+        StringBuilder response =
+                new StringBuilder();
+    
+        response.append("Pending expenses:\n");
+    
+        for (PendingItemResponse expense
+                : pending.getPendingExpenses()) {
+    
+            response.append("- ")
+                    .append(expense.getName())
+                    .append(" | Day ")
+                    .append(expense.getDayOfMonth())
+                    .append(" -> ")
+                    .append(
+                            MoneyFormatter.format(
+                                    expense.getAmount()))
+                    .append("\n");
+        }
+    
+        response.append("\nPending income:\n");
+    
+        for (PendingItemResponse income
+                : pending.getPendingIncomes()) {
+    
+            response.append("- ")
+                    .append(income.getName())
+                    .append(" | Day ")
+                    .append(income.getDayOfMonth())
+                    .append(" -> ")
+                    .append(
+                            MoneyFormatter.format(
+                                    income.getAmount()))
+                    .append("\n");
+        }
+    
+        response.append("\nNet pending balance: ")
+                .append(
+                        MoneyFormatter.format(
+                                pending.getNetPendingBalance()));
+    
+        return response.toString();
     }
 
     private String getHelpMessage() {

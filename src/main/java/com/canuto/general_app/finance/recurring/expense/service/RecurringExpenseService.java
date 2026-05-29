@@ -3,6 +3,7 @@ package com.canuto.general_app.finance.recurring.expense.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -134,5 +135,21 @@ public class RecurringExpenseService {
             case WEEKLY ->
                 lastPayment.plusDays(7).isAfter(now);
         };
+    }
+
+    public List<RecurringExpense> getPendingRecurringExpenseList() {
+
+        return recurringExpenseRepository
+                .findAll()
+                .stream()
+                .filter(recurringExpense ->
+                        Boolean.TRUE.equals(
+                                recurringExpense.getActive()))
+                .filter(recurringExpense ->
+                        !isAlreadyPaidThisPeriod(
+                                recurringExpense))
+                .sorted(Comparator.comparing(
+                        RecurringExpense::getDayOfMonth))
+                .toList();
     }
 }

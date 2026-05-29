@@ -3,6 +3,7 @@ package com.canuto.general_app.finance.recurring.income.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -142,5 +143,21 @@ public class RecurringIncomeService {
         }
 
         return totalPending;
+    }
+
+    public List<RecurringIncome> getPendingRecurringIncomeList() {
+
+        return recurringIncomeRepository
+                .findAll()
+                .stream()
+                .filter(recurringIncome ->
+                        Boolean.TRUE.equals(
+                                recurringIncome.getActive()))
+                .filter(recurringIncome ->
+                        !isAlreadyReceivedThisPeriod(
+                                recurringIncome))
+                .sorted(Comparator.comparing(
+                        RecurringIncome::getDayOfMonth))
+                .toList();
     }
 }
