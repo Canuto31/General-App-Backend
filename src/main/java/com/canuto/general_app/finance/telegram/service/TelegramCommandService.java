@@ -23,89 +23,93 @@ import com.canuto.general_app.finance.telegram.enums.TelegramCommandType;
 @Service
 public class TelegramCommandService {
 
-    private final TelegramCommandResolver commandResolver;
-    private final TextExpenseParserService expenseParserService;
-    private final TextIncomeParserService incomeParserService;
-    private final ExpenseService expenseService;
-    private final IncomeService incomeService;
-    private final RecurringExpenseService recurringExpenseService;
-    private final RecurringIncomeService recurringIncomeService;
-    private final FinancialSummarySerivice financialSummarySerivice;
+        private final TelegramCommandResolver commandResolver;
+        private final TextExpenseParserService expenseParserService;
+        private final TextIncomeParserService incomeParserService;
+        private final ExpenseService expenseService;
+        private final IncomeService incomeService;
+        private final RecurringExpenseService recurringExpenseService;
+        private final RecurringIncomeService recurringIncomeService;
+        private final FinancialSummarySerivice financialSummarySerivice;
 
-    public TelegramCommandService(TelegramCommandResolver commandResolver,
-            TextExpenseParserService expenseParserService, TextIncomeParserService incomeParserService,
-            ExpenseService expenseService, IncomeService incomeService, RecurringExpenseService recurringExpenseService,
-            RecurringIncomeService recurringIncomeService, FinancialSummarySerivice financialSummarySerivice) {
-        this.commandResolver = commandResolver;
-        this.expenseParserService = expenseParserService;
-        this.incomeParserService = incomeParserService;
-        this.expenseService = expenseService;
-        this.incomeService = incomeService;
-        this.recurringExpenseService = recurringExpenseService;
-        this.recurringIncomeService = recurringIncomeService;
-        this.financialSummarySerivice = financialSummarySerivice;
-    }
-
-    public String process(String text) {
-        TelegramCommandType commandType = commandResolver.resolve(text);
-
-        return switch (commandType) {
-            case EXPENSE -> handleExpense(text);
-
-            case PAY_RECURRING -> handlePayRecurring(text);
-
-            case INCOME -> handleIncomes(text);
-            
-            case RECURRING_INCOME -> handleRecurringIncomes(text);
-
-            case SUMMARY -> handleSummary();
-
-            case BALANCE -> handleBalance();
-
-            case PENDING -> handlePending();
-
-            case HELP -> getHelpMessage();
-
-            case UNKNOWN -> "Unknown command.";
-        };
-    }
-
-    private String handleExpense(String text) {
-
-        List<Expense> expenses = expenseParserService.parseMultipleExpenses(text);
-
-        for (Expense expense : expenses) {
-            expenseService.saveExpense(expense);
+        public TelegramCommandService(TelegramCommandResolver commandResolver,
+                        TextExpenseParserService expenseParserService, TextIncomeParserService incomeParserService,
+                        ExpenseService expenseService, IncomeService incomeService,
+                        RecurringExpenseService recurringExpenseService,
+                        RecurringIncomeService recurringIncomeService,
+                        FinancialSummarySerivice financialSummarySerivice) {
+                this.commandResolver = commandResolver;
+                this.expenseParserService = expenseParserService;
+                this.incomeParserService = incomeParserService;
+                this.expenseService = expenseService;
+                this.incomeService = incomeService;
+                this.recurringExpenseService = recurringExpenseService;
+                this.recurringIncomeService = recurringIncomeService;
+                this.financialSummarySerivice = financialSummarySerivice;
         }
 
-        return "Saved " + expenses.size() + " expense(s).";
-    }
+        public String process(String text) {
+                TelegramCommandType commandType = commandResolver.resolve(text);
 
-    private String handlePayRecurring(String text) {
+                return switch (commandType) {
+                        case EXPENSE -> handleExpense(text);
 
-        String recurringName = text
-                .replaceFirst("paid ", "")
-                .trim();
+                        case PAY_RECURRING -> handlePayRecurring(text);
 
-        recurringExpenseService.payRecurringExpense(recurringName);
+                        case INCOME -> handleIncomes(text);
 
-        return "Recurring expense paid: " + recurringName;
-    }
+                        case RECURRING_INCOME -> handleRecurringIncomes(text);
 
-    private String handleIncomes(String text) {
+                        case SUMMARY -> handleSummary();
 
-        List<Income> incomes = incomeParserService.parseMultipleIncomes(text);
+                        case BALANCE -> handleBalance();
 
-        for (Income income : incomes) {
-            incomeService.save(income);
+                        case PENDING -> handlePending();
+
+                        case HELP -> getHelpMessage();
+
+                        case UNKNOWN -> "Unknown command.";
+                };
         }
 
-        return "Received " + incomes.size() + " income(s).";
-    }
+        private String handleExpense(String text) {
+
+                List<Expense> expenses = expenseParserService.parseMultipleExpenses(text);
+
+                for (Expense expense : expenses) {
+                        expenseService.saveExpense(expense);
+                }
+
+                return "Saved " + expenses.size() + " expense(s).";
+        }
+
+        private String handlePayRecurring(String text) {
+
+                String recurringName = text
+                        .toLowerCase()
+                        .replaceFirst("paid ", "")
+                        .trim();
+
+                recurringExpenseService.payRecurringExpense(recurringName);
+
+                return "Recurring expense paid: " + recurringName;
+        }
+
+        private String handleIncomes(String text) {
+
+                List<Income> incomes = incomeParserService.parseMultipleIncomes(text);
+
+                for (Income income : incomes) {
+                        incomeService.save(income);
+                }
+
+                return "Received " + incomes.size() + " income(s).";
+        }
 
     private String handleRecurringIncomes(String text) {
 
         String recurringIncomeName = text
+                .toLowerCase()
                 .replaceFirst("received ", "")
                 .trim();
     
@@ -116,101 +120,95 @@ public class TelegramCommandService {
                 + recurringIncomeName;
     }
 
-    private String handleSummary() {
-        MonthSummaryResponse summary = financialSummarySerivice.getMonthSummary();
+        private String handleSummary() {
+                MonthSummaryResponse summary = financialSummarySerivice.getMonthSummary();
 
-        return """
-            Current balance: %s
-            Pending recurring expenses: %s
-            Pending recurring income: %s
-            Projected end month balance: %s
-            """
-            .formatted(
-                    MoneyFormatter.format(summary.getCurrentBalance()),
-                    MoneyFormatter.format(summary.getPendingRecurringExpenses()),
-                    MoneyFormatter.format(summary.getPendingRecurringIncome()),
-                    MoneyFormatter.format(summary.getProjectedEndMonthBalance())
-            );
+                return """
+                                Current balance: %s
+                                Pending recurring expenses: %s
+                                Pending recurring income: %s
+                                Projected end month balance: %s
+                                """
+                                .formatted(
+                                                MoneyFormatter.format(summary.getCurrentBalance()),
+                                                MoneyFormatter.format(summary.getPendingRecurringExpenses()),
+                                                MoneyFormatter.format(summary.getPendingRecurringIncome()),
+                                                MoneyFormatter.format(summary.getProjectedEndMonthBalance()));
 
-    }
-    
-    private String handleBalance() {
-        
-        CurrentBalanceResponse balance = financialSummarySerivice.getCurrentBalance();
-
-        return """
-            Current balance: %s
-            Total income: %s
-            Total expenses: %s
-            """
-            .formatted(
-                    MoneyFormatter.format(balance.getCurrentBalance()),
-                    MoneyFormatter.format(balance.getTotalIncome()),
-                    MoneyFormatter.format(balance.getTotalExpenses())
-            );
-    }
-
-    private String handlePending() {
-
-        PendingSummaryResponse pending =
-                financialSummarySerivice
-                        .getPendingSummary();
-    
-        StringBuilder response =
-                new StringBuilder();
-    
-        response.append("Pending expenses:\n");
-    
-        for (PendingItemResponse expense
-                : pending.getPendingExpenses()) {
-    
-            response.append("- ")
-                    .append(expense.getName())
-                    .append(" | Day ")
-                    .append(expense.getDayOfMonth())
-                    .append(" -> ")
-                    .append(
-                            MoneyFormatter.format(
-                                    expense.getAmount()))
-                    .append("\n");
         }
-    
-        response.append("\nPending income:\n");
-    
-        for (PendingItemResponse income
-                : pending.getPendingIncomes()) {
-    
-            response.append("- ")
-                    .append(income.getName())
-                    .append(" | Day ")
-                    .append(income.getDayOfMonth())
-                    .append(" -> ")
-                    .append(
-                            MoneyFormatter.format(
-                                    income.getAmount()))
-                    .append("\n");
+
+        private String handleBalance() {
+
+                CurrentBalanceResponse balance = financialSummarySerivice.getCurrentBalance();
+
+                return """
+                                Current balance: %s
+                                Total income: %s
+                                Total expenses: %s
+                                """
+                                .formatted(
+                                                MoneyFormatter.format(balance.getCurrentBalance()),
+                                                MoneyFormatter.format(balance.getTotalIncome()),
+                                                MoneyFormatter.format(balance.getTotalExpenses()));
         }
-    
-        response.append("\nNet pending balance: ")
-                .append(
-                        MoneyFormatter.format(
-                                pending.getNetPendingBalance()));
-    
-        return response.toString();
-    }
 
-    private String getHelpMessage() {
+        private String handlePending() {
 
-        return """
-                Available commands:
+                PendingSummaryResponse pending = financialSummarySerivice
+                                .getPendingSummary();
 
-                30k burger
-                paid rent
-                received salary
-                summary
-                balance
-                pending
-                help
-                """;
-    }
+                StringBuilder response = new StringBuilder();
+
+                response.append("Pending expenses:\n");
+
+                for (PendingItemResponse expense : pending.getPendingExpenses()) {
+
+                        response.append("- ")
+                                        .append(expense.getName())
+                                        .append(" | Day ")
+                                        .append(expense.getDayOfMonth())
+                                        .append(" -> ")
+                                        .append(
+                                                        MoneyFormatter.format(
+                                                                        expense.getAmount()))
+                                        .append("\n");
+                }
+
+                response.append("\nPending income:\n");
+
+                for (PendingItemResponse income : pending.getPendingIncomes()) {
+
+                        response.append("- ")
+                                        .append(income.getName())
+                                        .append(" | Day ")
+                                        .append(income.getDayOfMonth())
+                                        .append(" -> ")
+                                        .append(
+                                                        MoneyFormatter.format(
+                                                                        income.getAmount()))
+                                        .append("\n");
+                }
+
+                response.append("\nNet pending balance: ")
+                                .append(
+                                                MoneyFormatter.format(
+                                                                pending.getNetPendingBalance()));
+
+                return response.toString();
+        }
+
+        private String getHelpMessage() {
+
+                return """
+                                Available commands:
+
+                                30k burger
+                                paid rent
+                                received salary
+                                summary
+                                balance
+                                pending
+                                help
+                                """;
+        }
 }
