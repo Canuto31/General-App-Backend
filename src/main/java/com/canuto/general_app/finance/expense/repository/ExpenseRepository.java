@@ -3,6 +3,7 @@ package com.canuto.general_app.finance.expense.repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     BigDecimal getTotalExpenses();
 
     List<Expense> findTop10ByOrderByDateDesc();
+
+    Optional<Expense> findTopByOrderByDateDesc();
 }

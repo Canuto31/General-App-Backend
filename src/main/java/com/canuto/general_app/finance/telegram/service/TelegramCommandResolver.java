@@ -57,6 +57,22 @@ public class TelegramCommandResolver {
             return TelegramCommandType.RECURRING_INCOMES;
         }
 
+        if (lowerText.equals("last expense")) {
+            return TelegramCommandType.LAST_EXPENSE;
+        }
+
+        if (lowerText.equals("last income")) {
+            return TelegramCommandType.LAST_INCOME;
+        }
+
+        if (lowerText.equals("delete last expense")) {
+            return TelegramCommandType.DELETE_LAST_EXPENSE;
+        }
+
+        if (lowerText.equals("delete last income")) {
+            return TelegramCommandType.DELETE_LAST_INCOME;
+        }
+
         if (lowerText.equals("balance")) {
             return TelegramCommandType.BALANCE;
         }

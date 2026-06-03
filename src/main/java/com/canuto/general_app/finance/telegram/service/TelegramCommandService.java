@@ -75,6 +75,14 @@ public class TelegramCommandService {
 
                         case RECURRING_INCOMES -> handleRecurringIncomesList();
 
+                        case LAST_EXPENSE -> handleLastExpense();
+
+                        case LAST_INCOME -> handleLastIncome();
+
+                        case DELETE_LAST_EXPENSE -> handleDeleteLastExpense();
+
+                        case DELETE_LAST_INCOME -> handleDeleteLastIncome();
+
                         case BALANCE -> handleBalance();
 
                         case PENDING -> handlePending();
@@ -141,6 +149,41 @@ public class TelegramCommandService {
                 return response.toString();
         }
 
+        private String handleLastExpense() {
+
+                Expense expense = expenseService.getLastExpense();
+
+                return """
+                                Last expense:
+
+                                Date: %s
+                                Category: %s
+                                Amount: %s
+                                Note: %s
+                                """
+                                .formatted(
+                                                expense.getDate(),
+                                                expense.getCategory().getName(),
+                                                formatCurrency(expense.getAmount()),
+                                                expense.getNote());
+        }
+
+        private String handleDeleteLastExpense() {
+
+                Expense expense = expenseService.deleteLastExpense();
+
+                return """
+                                Deleted expense:
+
+                                %s
+                                %s
+                                """
+                                .formatted(
+                                                expense.getNote(),
+                                                formatCurrency(
+                                                                expense.getAmount()));
+        }
+
         private String handlePayRecurring(String text) {
 
                 String recurringName = text
@@ -188,29 +231,62 @@ public class TelegramCommandService {
 
         private String handleRecurringIncomesList() {
 
-                List<RecurringIncome> incomes =
-                        recurringIncomeService.getActiveRecurringIncomes();
-            
+                List<RecurringIncome> incomes = recurringIncomeService.getActiveRecurringIncomes();
+
                 if (incomes.isEmpty()) {
-                    return "No recurring incomes found.";
+                        return "No recurring incomes found.";
                 }
-            
-                StringBuilder response =
-                        new StringBuilder("Recurring incomes:\n\n");
-            
+
+                StringBuilder response = new StringBuilder("Recurring incomes:\n\n");
+
                 for (RecurringIncome income : incomes) {
-            
-                    response.append("- ")
-                            .append(income.getName())
-                            .append(" | ")
-                            .append(formatCurrency(income.getAmount()))
-                            .append(" | Day ")
-                            .append(income.getDayOfMonth())
-                            .append("\n");
+
+                        response.append("- ")
+                                        .append(income.getName())
+                                        .append(" | ")
+                                        .append(formatCurrency(income.getAmount()))
+                                        .append(" | Day ")
+                                        .append(income.getDayOfMonth())
+                                        .append("\n");
                 }
-            
+
                 return response.toString();
-            }
+        }
+
+        private String handleLastIncome() {
+
+                Income income = incomeService.getLastIncome();
+
+                return """
+                                Last income:
+
+                                Date: %s
+                                Category: %s
+                                Amount: %s
+                                Note: %s
+                                """
+                                .formatted(
+                                                income.getDate(),
+                                                income.getCategory().getName(),
+                                                formatCurrency(income.getAmount()),
+                                                income.getNote());
+        }
+
+        private String handleDeleteLastIncome() {
+
+                Income income = incomeService.deleteLastIncome();
+
+                return """
+                                Deleted income:
+
+                                %s
+                                %s
+                                """
+                                .formatted(
+                                                income.getNote(),
+                                                formatCurrency(
+                                                                income.getAmount()));
+        }
 
         private String formatCurrency(BigDecimal amount) {
                 return NumberFormat
@@ -324,6 +400,10 @@ public class TelegramCommandService {
                                 incomes
                                 recurring expenses
                                 recurring incomes
+                                last expense
+                                last income
+                                delete last expense
+                                delete last income
                                 help
                                 """;
         }

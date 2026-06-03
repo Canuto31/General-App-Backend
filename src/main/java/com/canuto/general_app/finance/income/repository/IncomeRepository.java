@@ -3,6 +3,7 @@ package com.canuto.general_app.finance.income.repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -22,4 +23,6 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
     BigDecimal getTotalIncome();
 
     List<Income> findTop10ByOrderByDateDesc();
+
+    Optional<Income> findTopByOrderByDateDesc();
 }
