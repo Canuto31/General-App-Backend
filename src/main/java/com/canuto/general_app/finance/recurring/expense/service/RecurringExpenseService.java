@@ -3,7 +3,6 @@ package com.canuto.general_app.finance.recurring.expense.service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -175,5 +174,9 @@ public class RecurringExpenseService {
         }
 
         return true;
+    }
+
+    public List<RecurringExpense> getActiveRecurringExpenses() {
+        return recurringExpenseRepository.findByActiveTrue();
     }
 }

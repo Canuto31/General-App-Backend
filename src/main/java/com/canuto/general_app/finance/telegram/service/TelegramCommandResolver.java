@@ -49,6 +49,14 @@ public class TelegramCommandResolver {
             return TelegramCommandType.INCOMES;
         }
 
+        if (lowerText.equals("recurring expenses")) {
+            return TelegramCommandType.RECURRING_EXPENSES;
+        }
+
+        if (lowerText.equals("recurring incomes")) {
+            return TelegramCommandType.RECURRING_INCOMES;
+        }
+
         if (lowerText.equals("balance")) {
             return TelegramCommandType.BALANCE;
         }

@@ -13,7 +13,9 @@ import com.canuto.general_app.finance.expense.service.ExpenseService;
 import com.canuto.general_app.finance.income.model.Income;
 import com.canuto.general_app.finance.income.parser.TextIncomeParserService;
 import com.canuto.general_app.finance.income.service.IncomeService;
+import com.canuto.general_app.finance.recurring.expense.model.RecurringExpense;
 import com.canuto.general_app.finance.recurring.expense.service.RecurringExpenseService;
+import com.canuto.general_app.finance.recurring.income.model.RecurringIncome;
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
 import com.canuto.general_app.finance.shared.utils.MoneyFormatter;
 import com.canuto.general_app.finance.summary.dto.CurrentBalanceResponse;
@@ -69,6 +71,10 @@ public class TelegramCommandService {
 
                         case INCOMES -> handleIncomesList();
 
+                        case RECURRING_EXPENSES -> handleRecurringExpenses();
+
+                        case RECURRING_INCOMES -> handleRecurringIncomesList();
+
                         case BALANCE -> handleBalance();
 
                         case PENDING -> handlePending();
@@ -106,6 +112,29 @@ public class TelegramCommandService {
                                         .append(expense.getCategory().getName())
                                         .append(" | ")
                                         .append(formatCurrency(expense.getAmount()))
+                                        .append("\n");
+                }
+
+                return response.toString();
+        }
+
+        private String handleRecurringExpenses() {
+                List<RecurringExpense> expenses = recurringExpenseService.getActiveRecurringExpenses();
+
+                if (expenses.isEmpty()) {
+                        return "No recurring expenses found.";
+                }
+
+                StringBuilder response = new StringBuilder("Recurring expenses:\n\n");
+
+                for (RecurringExpense expense : expenses) {
+
+                        response.append("- ")
+                                        .append(expense.getName())
+                                        .append(" | ")
+                                        .append(formatCurrency(expense.getAmount()))
+                                        .append(" | Day ")
+                                        .append(expense.getDayOfMonth())
                                         .append("\n");
                 }
 
@@ -157,11 +186,37 @@ public class TelegramCommandService {
                 return response.toString();
         }
 
+        private String handleRecurringIncomesList() {
+
+                List<RecurringIncome> incomes =
+                        recurringIncomeService.getActiveRecurringIncomes();
+            
+                if (incomes.isEmpty()) {
+                    return "No recurring incomes found.";
+                }
+            
+                StringBuilder response =
+                        new StringBuilder("Recurring incomes:\n\n");
+            
+                for (RecurringIncome income : incomes) {
+            
+                    response.append("- ")
+                            .append(income.getName())
+                            .append(" | ")
+                            .append(formatCurrency(income.getAmount()))
+                            .append(" | Day ")
+                            .append(income.getDayOfMonth())
+                            .append("\n");
+                }
+            
+                return response.toString();
+            }
+
         private String formatCurrency(BigDecimal amount) {
                 return NumberFormat
-                        .getNumberInstance(new Locale("es", "CO"))
-                        .format(amount);
-            }
+                                .getNumberInstance(new Locale("es", "CO"))
+                                .format(amount);
+        }
 
         private String handleRecurringIncomes(String text) {
 
@@ -267,6 +322,8 @@ public class TelegramCommandService {
                                 pending
                                 expenses
                                 incomes
+                                recurring expenses
+                                recurring incomes
                                 help
                                 """;
         }
