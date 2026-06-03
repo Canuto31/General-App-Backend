@@ -41,6 +41,14 @@ public class TelegramCommandResolver {
             return TelegramCommandType.SUMMARY;
         }
 
+        if (lowerText.equals("expenses")) {
+            return TelegramCommandType.EXPENSES;
+        }
+
+        if (lowerText.equals("incomes")) {
+            return TelegramCommandType.INCOMES;
+        }
+
         if (lowerText.equals("balance")) {
             return TelegramCommandType.BALANCE;
         }

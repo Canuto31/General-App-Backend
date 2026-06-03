@@ -46,4 +46,8 @@ public class IncomeService {
 
         return repository.save(income);
     }
+
+    public List<Income> getLastIncomes() {
+        return repository.findTop10ByOrderByDateDesc();
+    }
 }

@@ -23,4 +23,8 @@ public class ExpenseService {
     public List<Expense> getAllExpenses() {
         return expenseRepository.findAll();
     }
+
+    public List<Expense> getLastExpenses() {
+        return expenseRepository.findTop10ByOrderByDateDesc();
+    }
 }

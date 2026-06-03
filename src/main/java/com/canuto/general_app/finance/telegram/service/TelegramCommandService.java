@@ -1,6 +1,9 @@
 package com.canuto.general_app.finance.telegram.service;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
@@ -62,6 +65,10 @@ public class TelegramCommandService {
 
                         case SUMMARY -> handleSummary();
 
+                        case EXPENSES -> handleExpenses();
+
+                        case INCOMES -> handleIncomesList();
+
                         case BALANCE -> handleBalance();
 
                         case PENDING -> handlePending();
@@ -83,12 +90,34 @@ public class TelegramCommandService {
                 return "Saved " + expenses.size() + " expense(s).";
         }
 
+        private String handleExpenses() {
+                List<Expense> expenses = expenseService.getLastExpenses();
+
+                if (expenses.isEmpty()) {
+                        return "No expenses found.";
+                }
+
+                StringBuilder response = new StringBuilder("Last expenses:\n\n");
+
+                for (Expense expense : expenses) {
+                        response.append("- ")
+                                        .append(expense.getDate())
+                                        .append(" | ")
+                                        .append(expense.getCategory().getName())
+                                        .append(" | ")
+                                        .append(formatCurrency(expense.getAmount()))
+                                        .append("\n");
+                }
+
+                return response.toString();
+        }
+
         private String handlePayRecurring(String text) {
 
                 String recurringName = text
-                        .toLowerCase()
-                        .replaceFirst("paid ", "")
-                        .trim();
+                                .toLowerCase()
+                                .replaceFirst("paid ", "")
+                                .trim();
 
                 recurringExpenseService.payRecurringExpense(recurringName);
 
@@ -106,19 +135,47 @@ public class TelegramCommandService {
                 return "Received " + incomes.size() + " income(s).";
         }
 
-    private String handleRecurringIncomes(String text) {
+        private String handleIncomesList() {
+                List<Income> incomes = incomeService.getLastIncomes();
 
-        String recurringIncomeName = text
-                .toLowerCase()
-                .replaceFirst("received ", "")
-                .trim();
-    
-        recurringIncomeService
-                .receiveRecurringIncome(recurringIncomeName);
-    
-        return "Recurring income received: "
-                + recurringIncomeName;
-    }
+                if (incomes.isEmpty()) {
+                        return "No incomes found.";
+                }
+
+                StringBuilder response = new StringBuilder("Last incomes:\n\n");
+
+                for (Income income : incomes) {
+                        response.append("- ")
+                                        .append(income.getDate())
+                                        .append(" | ")
+                                        .append(income.getCategory().getName())
+                                        .append(" | ")
+                                        .append(formatCurrency(income.getAmount()))
+                                        .append("\n");
+                }
+
+                return response.toString();
+        }
+
+        private String formatCurrency(BigDecimal amount) {
+                return NumberFormat
+                        .getNumberInstance(new Locale("es", "CO"))
+                        .format(amount);
+            }
+
+        private String handleRecurringIncomes(String text) {
+
+                String recurringIncomeName = text
+                                .toLowerCase()
+                                .replaceFirst("received ", "")
+                                .trim();
+
+                recurringIncomeService
+                                .receiveRecurringIncome(recurringIncomeName);
+
+                return "Recurring income received: "
+                                + recurringIncomeName;
+        }
 
         private String handleSummary() {
                 MonthSummaryResponse summary = financialSummarySerivice.getMonthSummary();
@@ -208,6 +265,8 @@ public class TelegramCommandService {
                                 summary
                                 balance
                                 pending
+                                expenses
+                                incomes
                                 help
                                 """;
         }

@@ -20,4 +20,6 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
                 FROM Income i
             """)
     BigDecimal getTotalIncome();
+
+    List<Income> findTop10ByOrderByDateDesc();
 }

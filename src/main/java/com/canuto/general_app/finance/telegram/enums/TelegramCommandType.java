@@ -4,11 +4,17 @@ public enum TelegramCommandType {
     
     EXPENSE,
     PAY_RECURRING,
+
     INCOME,
     RECURRING_INCOME,
+
     SUMMARY,
     BALANCE,
     PENDING,
+
+    EXPENSES,
+    INCOMES,
+    
     HELP,
     UNKNOWN
 }

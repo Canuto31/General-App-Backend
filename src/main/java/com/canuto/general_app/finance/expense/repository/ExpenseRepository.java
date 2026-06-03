@@ -20,4 +20,6 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
                 FROM Expense e
             """)
     BigDecimal getTotalExpenses();
+
+    List<Expense> findTop10ByOrderByDateDesc();
 }
