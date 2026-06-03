@@ -85,6 +85,14 @@ public class TelegramCommandResolver {
             return TelegramCommandType.HELP;
         }
 
-        return TelegramCommandType.EXPENSE;
+        if (looksLikeExpense(lowerText)) {
+            return TelegramCommandType.EXPENSE;
+        }
+        
+        return TelegramCommandType.UNKNOWN;
+    }
+
+    private boolean looksLikeExpense(String text) {
+        return text.matches("^\\d+[kKmM]?\\s+.+");
     }
 }

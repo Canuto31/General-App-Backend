@@ -89,7 +89,12 @@ public class TelegramCommandService {
 
                         case HELP -> getHelpMessage();
 
-                        case UNKNOWN -> "Unknown command.";
+                        case UNKNOWN ->
+                                """
+                                                Unknown command.
+
+                                                Type 'help' to see available commands.
+                                                """;
                 };
         }
 
