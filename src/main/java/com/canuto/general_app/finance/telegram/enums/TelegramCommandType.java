@@ -24,6 +24,11 @@ public enum TelegramCommandType {
     DELETE_LAST_EXPENSE,
     DELETE_LAST_INCOME,
 
+    CATEGORIES,
+    INCOME_CATEGORIES,
+    MONTH_EXPENSES,
+    YEAR_EXPENSES,
+
     HELP,
     UNKNOWN
 }

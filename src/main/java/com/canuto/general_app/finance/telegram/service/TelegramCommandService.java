@@ -18,10 +18,14 @@ import com.canuto.general_app.finance.recurring.expense.service.RecurringExpense
 import com.canuto.general_app.finance.recurring.income.model.RecurringIncome;
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
 import com.canuto.general_app.finance.shared.utils.MoneyFormatter;
+import com.canuto.general_app.finance.statistics.dto.CategoryExpenseDto;
+import com.canuto.general_app.finance.statistics.service.ExpenseStatsService;
+import com.canuto.general_app.finance.summary.dto.CategorySummaryResponse;
 import com.canuto.general_app.finance.summary.dto.CurrentBalanceResponse;
 import com.canuto.general_app.finance.summary.dto.MonthSummaryResponse;
 import com.canuto.general_app.finance.summary.dto.PendingItemResponse;
 import com.canuto.general_app.finance.summary.dto.PendingSummaryResponse;
+import com.canuto.general_app.finance.summary.service.CategorySummaryService;
 import com.canuto.general_app.finance.summary.service.FinancialSummarySerivice;
 import com.canuto.general_app.finance.telegram.enums.TelegramCommandType;
 
@@ -36,13 +40,17 @@ public class TelegramCommandService {
         private final RecurringExpenseService recurringExpenseService;
         private final RecurringIncomeService recurringIncomeService;
         private final FinancialSummarySerivice financialSummarySerivice;
+        private final CategorySummaryService categorySummaryService;
+        private final ExpenseStatsService expenseStatsService;
 
         public TelegramCommandService(TelegramCommandResolver commandResolver,
                         TextExpenseParserService expenseParserService, TextIncomeParserService incomeParserService,
                         ExpenseService expenseService, IncomeService incomeService,
                         RecurringExpenseService recurringExpenseService,
                         RecurringIncomeService recurringIncomeService,
-                        FinancialSummarySerivice financialSummarySerivice) {
+                        FinancialSummarySerivice financialSummarySerivice,
+                        CategorySummaryService categorySummaryService,
+                        ExpenseStatsService expenseStatsService) {
                 this.commandResolver = commandResolver;
                 this.expenseParserService = expenseParserService;
                 this.incomeParserService = incomeParserService;
@@ -51,6 +59,8 @@ public class TelegramCommandService {
                 this.recurringExpenseService = recurringExpenseService;
                 this.recurringIncomeService = recurringIncomeService;
                 this.financialSummarySerivice = financialSummarySerivice;
+                this.categorySummaryService = categorySummaryService;
+                this.expenseStatsService = expenseStatsService;
         }
 
         public String process(String text) {
@@ -82,6 +92,14 @@ public class TelegramCommandService {
                         case DELETE_LAST_EXPENSE -> handleDeleteLastExpense();
 
                         case DELETE_LAST_INCOME -> handleDeleteLastIncome();
+
+                        case CATEGORIES -> handleCategories();
+
+                        case INCOME_CATEGORIES -> handleIncomeCategories();
+
+                        case MONTH_EXPENSES -> handleMonthExpenses();
+
+                        case YEAR_EXPENSES -> handleYearExpenses();
 
                         case BALANCE -> handleBalance();
 
@@ -293,6 +311,94 @@ public class TelegramCommandService {
                                                                 income.getAmount()));
         }
 
+        private String handleCategories() {
+
+                List<CategorySummaryResponse> categories = categorySummaryService
+                                .getExpenseCategories();
+
+                StringBuilder sb = new StringBuilder();
+
+                sb.append("Expenses by category\n\n");
+
+                for (CategorySummaryResponse category : categories) {
+
+                        sb.append(category.getCategoryName())
+                                        .append(" -> ")
+                                        .append(
+                                                        MoneyFormatter.format(
+                                                                        category.getTotalAmount()))
+                                        .append("\n");
+                }
+
+                return sb.toString();
+        }
+
+        private String handleIncomeCategories() {
+
+                List<CategorySummaryResponse> categories = categorySummaryService
+                                .getIncomeCategories();
+
+                StringBuilder sb = new StringBuilder();
+
+                sb.append("Income by category\n\n");
+
+                for (CategorySummaryResponse category : categories) {
+
+                        sb.append(category.getCategoryName())
+                                        .append(" -> ")
+                                        .append(
+                                                        MoneyFormatter.format(
+                                                                        category.getTotalAmount()))
+                                        .append("\n");
+                }
+
+                return sb.toString();
+        }
+
+        private String handleMonthExpenses() {
+
+                List<CategoryExpenseDto> categories = expenseStatsService
+                                .getCurrentMonthExpensesByCategory();
+
+                StringBuilder sb = new StringBuilder();
+
+                sb.append("Expenses this month\n\n");
+
+                for (CategoryExpenseDto category : categories) {
+
+                        sb.append("- ")
+                                        .append(category.getCategoryName())
+                                        .append(" -> ")
+                                        .append(MoneyFormatter.format(
+                                                        category.getAmount()))
+                                        .append("\n");
+                }
+
+                return sb.toString();
+        }
+
+        private String handleYearExpenses() {
+
+                List<CategoryExpenseDto> categories = expenseStatsService
+                                .getCurrentYearExpensesByCategory();
+
+                StringBuilder sb = new StringBuilder();
+
+                sb.append("Expenses this year\n\n");
+
+                for (CategoryExpenseDto category : categories) {
+
+                        sb.append("- ")
+                                        .append(category.getCategoryName())
+                                        .append(" -> ")
+                                        .append(MoneyFormatter.format(
+                                                        category.getAmount()))
+                                        .append("\n");
+                }
+
+                return sb.toString();
+        }
+
         private String formatCurrency(BigDecimal amount) {
                 return NumberFormat
                                 .getNumberInstance(new Locale("es", "CO"))
@@ -401,6 +507,10 @@ public class TelegramCommandService {
                                 summary
                                 balance
                                 pending
+                                categories
+                                income categories
+                                month expenses
+                                year expenses
                                 expenses
                                 incomes
                                 recurring expenses
