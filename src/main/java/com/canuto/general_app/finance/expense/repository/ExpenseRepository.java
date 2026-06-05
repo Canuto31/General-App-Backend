@@ -25,4 +25,40 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     List<Expense> findTop10ByOrderByDateDesc();
 
     Optional<Expense> findTopByOrderByDateDesc();
+
+    @Query("""
+                SELECT
+                    e.category.name,
+                    SUM(e.amount)
+                FROM Expense e
+                GROUP BY e.category.name
+                ORDER BY SUM(e.amount) DESC
+            """)
+    List<Object[]> getExpensesGroupedByCategory();
+
+    @Query("""
+                SELECT
+                    c.name,
+                    SUM(e.amount)
+                FROM Expense e
+                JOIN e.category c
+                WHERE YEAR(e.date) = :year
+                  AND MONTH(e.date) = :month
+                GROUP BY c.name
+            """)
+    List<Object[]> getExpensesByCategoryForMonth(
+            Integer year,
+            Integer month);
+
+    @Query("""
+                SELECT
+                    c.name,
+                    SUM(e.amount)
+                FROM Expense e
+                JOIN e.category c
+                WHERE YEAR(e.date) = :year
+                GROUP BY c.name
+            """)
+    List<Object[]> getExpensesByCategoryForYear(
+            Integer year);
 }

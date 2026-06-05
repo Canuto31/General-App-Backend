@@ -25,4 +25,14 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
     List<Income> findTop10ByOrderByDateDesc();
 
     Optional<Income> findTopByOrderByDateDesc();
+
+    @Query("""
+                SELECT
+                    i.category.name,
+                    SUM(i.amount)
+                FROM Income i
+                GROUP BY i.category.name
+                ORDER BY SUM(i.amount) DESC
+            """)
+    List<Object[]> getIncomeGroupedByCategory();
 }
