@@ -46,4 +46,26 @@ public class IncomeService {
 
         return repository.save(income);
     }
+
+    public List<Income> getLastIncomes() {
+        return repository.findTop10ByOrderByDateDesc();
+    }
+
+    public Income getLastIncome() {
+
+        return repository
+                .findTopByOrderByDateDesc()
+                .orElseThrow(() -> new RuntimeException("No incomes found"));
+    }
+
+    public Income deleteLastIncome() {
+
+        Income income = repository
+                .findTopByOrderByDateDesc()
+                .orElseThrow(() -> new RuntimeException("No incomes found"));
+
+        repository.delete(income);
+
+        return income;
+    }
 }

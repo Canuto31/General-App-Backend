@@ -1,6 +1,9 @@
 package com.canuto.general_app.finance.telegram.service;
 
+import java.math.BigDecimal;
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.stereotype.Service;
 
@@ -10,7 +13,9 @@ import com.canuto.general_app.finance.expense.service.ExpenseService;
 import com.canuto.general_app.finance.income.model.Income;
 import com.canuto.general_app.finance.income.parser.TextIncomeParserService;
 import com.canuto.general_app.finance.income.service.IncomeService;
+import com.canuto.general_app.finance.recurring.expense.model.RecurringExpense;
 import com.canuto.general_app.finance.recurring.expense.service.RecurringExpenseService;
+import com.canuto.general_app.finance.recurring.income.model.RecurringIncome;
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
 import com.canuto.general_app.finance.shared.utils.MoneyFormatter;
 import com.canuto.general_app.finance.statistics.dto.CategoryExpenseDto;
@@ -79,6 +84,21 @@ public class TelegramCommandService {
                         case MONTH_EXPENSES -> handleMonthExpenses();
 
                         case YEAR_EXPENSES -> handleYearExpenses();
+                        case EXPENSES -> handleExpenses();
+
+                        case INCOMES -> handleIncomesList();
+
+                        case RECURRING_EXPENSES -> handleRecurringExpenses();
+
+                        case RECURRING_INCOMES -> handleRecurringIncomesList();
+
+                        case LAST_EXPENSE -> handleLastExpense();
+
+                        case LAST_INCOME -> handleLastIncome();
+
+                        case DELETE_LAST_EXPENSE -> handleDeleteLastExpense();
+
+                        case DELETE_LAST_INCOME -> handleDeleteLastIncome();
 
                         case BALANCE -> handleBalance();
 
@@ -86,7 +106,12 @@ public class TelegramCommandService {
 
                         case HELP -> getHelpMessage();
 
-                        case UNKNOWN -> "Unknown command.";
+                        case UNKNOWN ->
+                                """
+                                                Unknown command.
+
+                                                Type 'help' to see available commands.
+                                                """;
                 };
         }
 
@@ -99,6 +124,86 @@ public class TelegramCommandService {
                 }
 
                 return "Saved " + expenses.size() + " expense(s).";
+        }
+
+        private String handleExpenses() {
+                List<Expense> expenses = expenseService.getLastExpenses();
+
+                if (expenses.isEmpty()) {
+                        return "No expenses found.";
+                }
+
+                StringBuilder response = new StringBuilder("Last expenses:\n\n");
+
+                for (Expense expense : expenses) {
+                        response.append("- ")
+                                        .append(expense.getDate())
+                                        .append(" | ")
+                                        .append(expense.getCategory().getName())
+                                        .append(" | ")
+                                        .append(formatCurrency(expense.getAmount()))
+                                        .append("\n");
+                }
+
+                return response.toString();
+        }
+
+        private String handleRecurringExpenses() {
+                List<RecurringExpense> expenses = recurringExpenseService.getActiveRecurringExpenses();
+
+                if (expenses.isEmpty()) {
+                        return "No recurring expenses found.";
+                }
+
+                StringBuilder response = new StringBuilder("Recurring expenses:\n\n");
+
+                for (RecurringExpense expense : expenses) {
+
+                        response.append("- ")
+                                        .append(expense.getName())
+                                        .append(" | ")
+                                        .append(formatCurrency(expense.getAmount()))
+                                        .append(" | Day ")
+                                        .append(expense.getDayOfMonth())
+                                        .append("\n");
+                }
+
+                return response.toString();
+        }
+
+        private String handleLastExpense() {
+
+                Expense expense = expenseService.getLastExpense();
+
+                return """
+                                Last expense:
+
+                                Date: %s
+                                Category: %s
+                                Amount: %s
+                                Note: %s
+                                """
+                                .formatted(
+                                                expense.getDate(),
+                                                expense.getCategory().getName(),
+                                                formatCurrency(expense.getAmount()),
+                                                expense.getNote());
+        }
+
+        private String handleDeleteLastExpense() {
+
+                Expense expense = expenseService.deleteLastExpense();
+
+                return """
+                                Deleted expense:
+
+                                %s
+                                %s
+                                """
+                                .formatted(
+                                                expense.getNote(),
+                                                formatCurrency(
+                                                                expense.getAmount()));
         }
 
         private String handlePayRecurring(String text) {
@@ -122,6 +227,93 @@ public class TelegramCommandService {
                 }
 
                 return "Received " + incomes.size() + " income(s).";
+        }
+
+        private String handleIncomesList() {
+                List<Income> incomes = incomeService.getLastIncomes();
+
+                if (incomes.isEmpty()) {
+                        return "No incomes found.";
+                }
+
+                StringBuilder response = new StringBuilder("Last incomes:\n\n");
+
+                for (Income income : incomes) {
+                        response.append("- ")
+                                        .append(income.getDate())
+                                        .append(" | ")
+                                        .append(income.getCategory().getName())
+                                        .append(" | ")
+                                        .append(formatCurrency(income.getAmount()))
+                                        .append("\n");
+                }
+
+                return response.toString();
+        }
+
+        private String handleRecurringIncomesList() {
+
+                List<RecurringIncome> incomes = recurringIncomeService.getActiveRecurringIncomes();
+
+                if (incomes.isEmpty()) {
+                        return "No recurring incomes found.";
+                }
+
+                StringBuilder response = new StringBuilder("Recurring incomes:\n\n");
+
+                for (RecurringIncome income : incomes) {
+
+                        response.append("- ")
+                                        .append(income.getName())
+                                        .append(" | ")
+                                        .append(formatCurrency(income.getAmount()))
+                                        .append(" | Day ")
+                                        .append(income.getDayOfMonth())
+                                        .append("\n");
+                }
+
+                return response.toString();
+        }
+
+        private String handleLastIncome() {
+
+                Income income = incomeService.getLastIncome();
+
+                return """
+                                Last income:
+
+                                Date: %s
+                                Category: %s
+                                Amount: %s
+                                Note: %s
+                                """
+                                .formatted(
+                                                income.getDate(),
+                                                income.getCategory().getName(),
+                                                formatCurrency(income.getAmount()),
+                                                income.getNote());
+        }
+
+        private String handleDeleteLastIncome() {
+
+                Income income = incomeService.deleteLastIncome();
+
+                return """
+                                Deleted income:
+
+                                %s
+                                %s
+                                """
+                                .formatted(
+                                                income.getNote(),
+                                                formatCurrency(
+                                                                income.getAmount()));
+        }
+
+        private String formatCurrency(BigDecimal amount) {
+                return NumberFormat
+                                .getNumberInstance(new Locale("es", "CO"))
+                                .format(amount);
         }
 
         private String handleRecurringIncomes(String text) {
@@ -314,6 +506,18 @@ public class TelegramCommandService {
                                 summary
                                 balance
                                 pending
+                                categories
+                                income categories
+                                month expenses
+                                year expenses
+                                expenses
+                                incomes
+                                recurring expenses
+                                recurring incomes
+                                last expense
+                                last income
+                                delete last expense
+                                delete last income
                                 help
                                 """;
         }

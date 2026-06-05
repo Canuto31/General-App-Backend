@@ -186,4 +186,11 @@ public class RecurringIncomeService {
 
                 return true;
         }
+
+        public List<RecurringIncome> getActiveRecurringIncomes() {
+                return recurringIncomeRepository.findAll()
+                .stream()
+                .filter(r -> Boolean.TRUE.equals(r.getActive()))
+                .toList();
+        }
 }

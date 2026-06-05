@@ -23,4 +23,26 @@ public class ExpenseService {
     public List<Expense> getAllExpenses() {
         return expenseRepository.findAll();
     }
+
+    public List<Expense> getLastExpenses() {
+        return expenseRepository.findTop10ByOrderByDateDesc();
+    }
+
+    public Expense getLastExpense() {
+
+        return expenseRepository
+                .findTopByOrderByDateDesc()
+                .orElseThrow(() -> new RuntimeException("No expenses found"));
+    }
+
+    public Expense deleteLastExpense() {
+
+        Expense expense = expenseRepository
+                .findTopByOrderByDateDesc()
+                .orElseThrow(() -> new RuntimeException("No expenses found"));
+
+        expenseRepository.delete(expense);
+
+        return expense;
+    }
 }

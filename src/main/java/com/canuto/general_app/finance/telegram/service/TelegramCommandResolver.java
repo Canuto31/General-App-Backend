@@ -41,6 +41,38 @@ public class TelegramCommandResolver {
             return TelegramCommandType.SUMMARY;
         }
 
+        if (lowerText.equals("expenses")) {
+            return TelegramCommandType.EXPENSES;
+        }
+
+        if (lowerText.equals("incomes")) {
+            return TelegramCommandType.INCOMES;
+        }
+
+        if (lowerText.equals("recurring expenses")) {
+            return TelegramCommandType.RECURRING_EXPENSES;
+        }
+
+        if (lowerText.equals("recurring incomes")) {
+            return TelegramCommandType.RECURRING_INCOMES;
+        }
+
+        if (lowerText.equals("last expense")) {
+            return TelegramCommandType.LAST_EXPENSE;
+        }
+
+        if (lowerText.equals("last income")) {
+            return TelegramCommandType.LAST_INCOME;
+        }
+
+        if (lowerText.equals("delete last expense")) {
+            return TelegramCommandType.DELETE_LAST_EXPENSE;
+        }
+
+        if (lowerText.equals("delete last income")) {
+            return TelegramCommandType.DELETE_LAST_INCOME;
+        }
+
         if (lowerText.equals("balance")) {
             return TelegramCommandType.BALANCE;
         }
@@ -69,6 +101,14 @@ public class TelegramCommandResolver {
             return TelegramCommandType.HELP;
         }
 
-        return TelegramCommandType.EXPENSE;
+        if (looksLikeExpense(lowerText)) {
+            return TelegramCommandType.EXPENSE;
+        }
+        
+        return TelegramCommandType.UNKNOWN;
+    }
+
+    private boolean looksLikeExpense(String text) {
+        return text.matches("^\\d+[kKmM]?\\s+.+");
     }
 }
