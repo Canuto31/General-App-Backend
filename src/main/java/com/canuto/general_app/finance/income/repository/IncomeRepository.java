@@ -20,4 +20,14 @@ public interface IncomeRepository extends JpaRepository<Income, Long> {
                 FROM Income i
             """)
     BigDecimal getTotalIncome();
+
+    @Query("""
+                SELECT
+                    i.category.name,
+                    SUM(i.amount)
+                FROM Income i
+                GROUP BY i.category.name
+                ORDER BY SUM(i.amount) DESC
+            """)
+    List<Object[]> getIncomeGroupedByCategory();
 }

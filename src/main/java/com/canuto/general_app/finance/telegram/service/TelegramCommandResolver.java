@@ -49,6 +49,22 @@ public class TelegramCommandResolver {
             return TelegramCommandType.PENDING;
         }
 
+        if (lowerText.equals("categories")) {
+            return TelegramCommandType.CATEGORIES;
+        }
+
+        if (lowerText.equals("income categories")) {
+            return TelegramCommandType.INCOME_CATEGORIES;
+        }
+
+        if (lowerText.equals("month expenses")) {
+            return TelegramCommandType.MONTH_EXPENSES;
+        }
+        
+        if (lowerText.equals("year expenses")) {
+            return TelegramCommandType.YEAR_EXPENSES;
+        }
+
         if (lowerText.equals("help")) {
             return TelegramCommandType.HELP;
         }
