@@ -13,7 +13,9 @@ import com.canuto.general_app.finance.expense.service.ExpenseService;
 import com.canuto.general_app.finance.income.model.Income;
 import com.canuto.general_app.finance.income.parser.TextIncomeParserService;
 import com.canuto.general_app.finance.income.service.IncomeService;
+import com.canuto.general_app.finance.recurring.expense.dto.PayRecurringExpenseRequest;
 import com.canuto.general_app.finance.recurring.expense.model.RecurringExpense;
+import com.canuto.general_app.finance.recurring.expense.parser.PayRecurringExpenseParserService;
 import com.canuto.general_app.finance.recurring.expense.service.RecurringExpenseService;
 import com.canuto.general_app.finance.recurring.income.model.RecurringIncome;
 import com.canuto.general_app.finance.recurring.income.service.RecurringIncomeService;
@@ -42,6 +44,7 @@ public class TelegramCommandService {
         private final FinancialSummarySerivice financialSummarySerivice;
         private final CategorySummaryService categorySummaryService;
         private final ExpenseStatsService expenseStatsService;
+        private final PayRecurringExpenseParserService payRecurringExpenseParserService;
 
         public TelegramCommandService(TelegramCommandResolver commandResolver,
                         TextExpenseParserService expenseParserService, TextIncomeParserService incomeParserService,
@@ -50,7 +53,8 @@ public class TelegramCommandService {
                         RecurringIncomeService recurringIncomeService,
                         FinancialSummarySerivice financialSummarySerivice,
                         CategorySummaryService categorySummaryService,
-                        ExpenseStatsService expenseStatsService) {
+                        ExpenseStatsService expenseStatsService,
+                        PayRecurringExpenseParserService payRecurringExpenseParserService) {
                 this.commandResolver = commandResolver;
                 this.expenseParserService = expenseParserService;
                 this.incomeParserService = incomeParserService;
@@ -61,6 +65,7 @@ public class TelegramCommandService {
                 this.financialSummarySerivice = financialSummarySerivice;
                 this.categorySummaryService = categorySummaryService;
                 this.expenseStatsService = expenseStatsService;
+                this.payRecurringExpenseParserService = payRecurringExpenseParserService;
         }
 
         public String process(String text) {
@@ -209,14 +214,11 @@ public class TelegramCommandService {
 
         private String handlePayRecurring(String text) {
 
-                String recurringName = text
-                                .toLowerCase()
-                                .replaceFirst("paid ", "")
-                                .trim();
+                PayRecurringExpenseRequest request = payRecurringExpenseParserService.parse(text);
 
-                recurringExpenseService.payRecurringExpense(recurringName);
+                recurringExpenseService.payRecurringExpense(request);
 
-                return "Recurring expense paid: " + recurringName;
+                return "Recurring expense paid: " + request.getRecurringName();
         }
 
         private String handleIncomes(String text) {

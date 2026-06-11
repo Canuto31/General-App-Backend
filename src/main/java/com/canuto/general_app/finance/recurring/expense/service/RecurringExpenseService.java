@@ -12,6 +12,7 @@ import com.canuto.general_app.finance.category.repository.CategoryRepository;
 import com.canuto.general_app.finance.expense.model.Expense;
 import com.canuto.general_app.finance.expense.repository.ExpenseRepository;
 import com.canuto.general_app.finance.recurring.expense.dto.CreateRecurringExpenseRequest;
+import com.canuto.general_app.finance.recurring.expense.dto.PayRecurringExpenseRequest;
 import com.canuto.general_app.finance.recurring.expense.model.RecurringExpense;
 import com.canuto.general_app.finance.recurring.expense.repository.RecurringExpenseRepository;
 
@@ -85,10 +86,10 @@ public class RecurringExpenseService {
         return totalPending;
     }
 
-    public Expense payRecurringExpense(String recurringName) {
+    public Expense payRecurringExpense(PayRecurringExpenseRequest request) {
 
         RecurringExpense recurringExpense = recurringExpenseRepository
-                .findByNameIgnoreCase(recurringName)
+                .findByNameIgnoreCase(request.getRecurringName())
                 .orElseThrow(() -> new RuntimeException("Recurring expense not found"));
 
         if (isAlreadyPaidThisPeriod(recurringExpense)) {
@@ -97,7 +98,7 @@ public class RecurringExpenseService {
 
         Expense expense = new Expense();
 
-        expense.setAmount(recurringExpense.getAmount());
+        expense.setAmount(request.getAmount());
         expense.setDate(LocalDate.now());
         expense.setNote("Recurring payment: " + recurringExpense.getName());
         expense.setCategory(recurringExpense.getCategory());
@@ -109,6 +110,22 @@ public class RecurringExpenseService {
         recurringExpenseRepository.save(recurringExpense);
 
         return savedExpense;
+    }
+
+    public Expense payRecurringExpense(String recurringName) {
+
+        RecurringExpense recurringExpense = recurringExpenseRepository
+                .findByNameIgnoreCase(recurringName)
+                .orElseThrow(() ->
+                        new RuntimeException("Recurring expense not found"));
+    
+        PayRecurringExpenseRequest request =
+                new PayRecurringExpenseRequest();
+    
+        request.setRecurringName(recurringName);
+        request.setAmount(recurringExpense.getAmount());
+    
+        return payRecurringExpense(request);
     }
 
     private boolean isAlreadyPaidThisPeriod(RecurringExpense recurringExpense) {
